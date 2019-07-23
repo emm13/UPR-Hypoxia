@@ -1,0 +1,4 @@
+GO.ID	GO.Term	Number.of.Fitness.Genes	Number.of.RBPs	Total.human.proteins.for.term	RBP.Fitness.Overlap	Overlapping.Genes
+GO:0042594	response to starvation	14	5	193	3	ACAT1;ADSL;CAD  
+GO:0001666	response to hypoxia	59	32	343	17	ACTN4;ADAM17;ADSL;AHCY;ATP1B1;CAV1;CRYAB;ERCC2;ERCC3;HK2;HSP90B1;ITPR2;LONP1;NF1;PKM;RHOA;SLC2A1 
+GO:0030968	endoplasmic reticulum unfolded protein response	21	10	101	5	DERL2;HSPA5;PTPN1;VCP;XBP1

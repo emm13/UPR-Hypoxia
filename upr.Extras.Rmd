@@ -1,0 +1,66 @@
+
+```{r 3a_RBPs-by-cancer-type }
+
+# There are 2807 proteins that are RBPs in the 
+fit.rbp = all.fit[which(all.fit$is.rbp == TRUE),] 
+dim(fit.rbp)
+table(fit.rbp$Tissue,fit.rbp$Fitness)/rowSums(table(fit.rbp$Tissue,fit.rbp$Fitness))
+
+# Reshape the fitness dataframe
+library(tidyr)
+fit.g = reshape2::melt(fit.rbp,id = "Gene.CellLine",na.rm=T)
+colnames(fit.g) = c("Gene","Cell.line","Fitness")
+
+# RBP stats by fitness and cell-line
+cell.fit.rbp.tab = round(table(fit.g$Cell.line,fit.g$Fitness)*100/rowSums(table(fit.g$Cell.line,fit.g$Fitness)),2)
+
+# RBP stats by fitness and cell-line
+fit.g = left_join(fit.g,metadat)
+tis.fit.rbp.tab = round(table(fit.g$Tissue,fit.g$Fitness)*100/rowSums(table(fit.g$Tissue,fit.g$Fitness)),2)
+ctype.fit.rbp.tab = round(table(fit.g$Cancer.Type,fit.g$Fitness)*100/rowSums(table(fit.g$Cancer.Type,fit.g$Fitness)),2)
+
+```
+On a tissue level, the range of these RBPs that are involved in core-fitness is between 30 and 40%. At a cell-line level between 10 and 50% are core fitness genes. 
+
+```{r 3b_Fitness-centric,echo=T,eval=F}
+core.fit = reshape2::melt(fitness,id = "Gene.CellLine",na.rm=T)
+colnames(core.fit) = c("Gene","Cell.line","Fitness")
+core.fit = core.fit[which(core.fit$Fitness == 1),]
+
+# Add RBP information and metadata information to core.fit
+core.fit = left_join(core.fit,metadat)
+core.fit$is.rbp = FALSE
+core.fit$is.rbp[which(core.fit$Gene %in% go.rbp$Gene.name)] = TRUE
+
+# Ggplots
+core.fit$Tissue.2 = core.fit$Tissue
+core.fit$Tissue.2 = factor(core.fit$Tissue.2, levels = names(sort(table(core.fit$Tissue))))
+head(core.fit)
+
+# Calculate percentages
+core.fit1 <- core.fit %>%
+  dplyr::filter(Fitness == 1) %>% 
+  dplyr::group_by(Tissue.2,is.rbp) %>% 
+  dplyr::summarise(count=n()) %>% 
+  dplyr::mutate(perc=count/sum(count)) %>% 
+  data.frame()
+
+core.fit2 <- core.fit %>%
+  dplyr::filter(Fitness == 1) %>% 
+  dplyr::group_by(Cancer.Type,is.rbp) %>% 
+  dplyr::summarise(count=n()) %>% 
+  dplyr::mutate(perc=count/sum(count)) %>% 
+  data.frame()
+
+core.fit3 <- core.fit %>%
+  dplyr::filter(Fitness == 1) %>% 
+  dplyr::group_by(Cell.line) %>% 
+  dplyr::summarise(count=n()) %>% 
+  dplyr::mutate(perc=count/sum(count)) %>% 
+  data.frame()
+
+table(core.fit$Cell.line,core.fit$is.rbp)
+ggplot(core.fit,aes(Tissue.2,fill=is))+geom_bar()+coord_flip()+labs(x="",y="Percentage")
+ggplot(core.fit2,aes(factor(Tissue.2),y=perc*100,fill=is.rbp))+geom_bar(stat="identity")+coord_flip()+labs(x="",y="Percentage")
+ggplot(core.fit3,aes(factor(Tissue.2),y=perc*100,fill=is.rbp))+geom_bar(stat="identity")+coord_flip()+labs(x="",y="Percentage")
+```
